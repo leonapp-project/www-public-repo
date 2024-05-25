@@ -1,0 +1,49 @@
+{% load static %}
+<!DOCTYPE html>
+
+<html lang="it">
+
+<head>
+    <link rel="icon" type="image/x-icon" href="./src/img/logo.png">
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Leonapp - Biglietto</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.1/css/bulma.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+    <meta name="description" content="L'app degli studenti del LeoneXIII è live!" />
+    <meta property="og:title" content="Leonapp - LeoneXIII" />
+    <meta property="og:image" content="https://www.leonapp.it/src/img/banner.png" />
+</head>
+
+<body>
+<section class="section">
+        <div class="container">
+            <h1 class="title">QR Code Example</h1>
+            <div class="content">
+                <p>This is your ticket code:</p>
+                <p>{{ ticket_code }}</p>
+            </div>
+            <div class="content">
+                <img id="qr-code" src="#" alt="QR Code">
+            </div>
+        </div>
+    </section>
+
+    <!-- <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> -->
+    <script src="https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"></script>
+    <script type="text/javascript">
+        // Generate QR code using qrcode library
+        var ticketCode = "{{ ticket_code }}";
+        var qrCode = new QRCode(document.getElementById("qr-code"), {
+            text: ticketCode,
+            width: 300,
+            height: 300,
+            colorDark: "#000000",
+            colorLight: "#ffffff",
+            correctLevel: QRCode.CorrectLevel.H
+        });
+    </script>
+</body>
+
+</html>

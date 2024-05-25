@@ -1,0 +1,105 @@
+{% load static %}
+<!DOCTYPE html>
+
+<html lang="it">
+
+<head>
+    <!-- <link rel="icon" type="image/x-icon" href="./src/img/logo.png"> -->
+    <link rel="icon" type="image/x-icon" href="{% static 'core/logo/logo.png' %}">
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Leonapp - {% block title %}{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+    <meta name="description" content="L'app degli studenti del LeoneXIII è live!" />
+    <meta property="og:title" content="Leonapp - LeoneXIII" />
+    <meta property="og:image" content="{% static 'core/logo/logo.png' %}" />
+    {% block css %}{% endblock %}
+</head>
+
+<body>
+
+    <!--navigation-->
+    <nav class="navbar py-4">
+        <div class="container is-fluid">
+            <div class="navbar-brand">
+                <a class="navbar-item" href="{% url 'index' %}">
+                    <img class="image" src="{% static 'core/logo/logo_text.png' %}" alt="" width="96px">
+                </a>
+                <a class="navbar-burger" role="button" data-target="navMenu" aria-label="menu" aria-expanded="false">
+                    <span aria-hidden="true"></span>
+                    <span aria-hidden="true"></span>
+                    <span aria-hidden="true"></span>
+                </a>
+            </div>
+            <div id="navMenu" class="navbar-menu">
+                <div class="navbar-start">
+                    <a class="navbar-item" href="{% url 'focaccine' %}">Home</a>
+                    <a class="navbar-item" href="{% url 'ticket-history' %}">Biglietti</a>
+                    <a class="navbar-item" href="{% url 'user_profile' %}">Profilo</a>
+                    <!-- Other navbar items -->
+                </div>
+                <div class="navbar-end">
+                    <div class="navbar-item">
+                        <div class="buttons">
+                            <a class="button is-light" href="{% url 'logout' %}">
+                                Logout
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+    
+
+
+    <!--breadcrumbs-->
+    <!-- <div class="section pt-4 pb-0">
+        <nav class="breadcrumb" aria-label="breadcrumbs">
+            <ul class="container">
+                <li>
+                    <a class="has-text-grey is-size-7-mobile">Starbucks Coffee</a>
+                </li>
+                <li><a class="has-text-grey is-size-7-mobile">Shop</a></li>
+                <li class="is-active">
+                    <a class="is-size-7-mobile">Mocha Cookie Crumble Frappuccino</a>
+                </li>
+            </ul>
+        </nav>
+    </div> -->
+
+    {% block content %}
+    {% endblock %}
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Get all "navbar-burger" elements
+            const $navbarBurgers = Array.prototype.slice.call(document.querySelectorAll('.navbar-burger'), 0);
+    
+            // Check if there are any navbar burgers
+            if ($navbarBurgers.length > 0) {
+                // Add a click event on each of them
+                $navbarBurgers.forEach(el => {
+                    el.addEventListener('click', () => {
+                        // Get the target from the "data-target" attribute
+                        const target = el.dataset.target;
+                        const $target = document.getElementById(target);
+    
+                        // Toggle the "is-active" class on both the "navbar-burger" and the "navbar-menu"
+                        el.classList.toggle('is-active');
+                        $target.classList.toggle('is-active');
+                    });
+                });
+            }
+        });
+    </script>
+    
+    
+
+    {% block javascript %}
+    {% endblock %}
+</body>
+
+</html>

@@ -1,0 +1,97 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Scan Tickets</title>
+      <style>
+    #preview {
+      height: 100%;
+      width: 100%;
+    }
+    #status {
+      font-size: 24px;
+      font-weight: bold;
+      text-align: center;
+      margin-top: 50px;
+    }
+    .success {
+      background-color: green;
+      color: white;
+    }
+    .error {
+      background-color: red;
+      color: white;
+    }
+  </style>
+{#    <script src="{% static 'scan/instascan.min.js' %}"></script>#}
+    	<script src="https://rawgit.com/schmich/instascan-builds/master/instascan.min.js"></script>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+
+
+
+  <video id="preview"></video>
+    <div id="status">Scanning...</div>
+    <button id="switchCameraButton">Switch Camera</button>
+  <script>
+      $.ajaxSetup({
+    headers: {
+        'X-CSRFToken': getCookie('csrftoken')
+    }
+});
+
+function getCookie(name) {
+    var cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        var cookies = document.cookie.split(';');
+        for (var i = 0; i < cookies.length; i++) {
+            var cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+    let scanner = new Instascan.Scanner({ video: document.getElementById('preview'), mirror: false});
+    let currentCameraIndex = 0;
+
+    scanner.addListener('scan', function(content) {
+      $.ajax({
+        type: "POST",
+        url: "/scan/validate-qrcode/",
+        data: { content: content },
+        success: function(data) {
+          $('#status').addClass('success').text('Success: ' + data.message);
+        },
+        error: function() {
+          $('#status').addClass('error').text('Error: Failed to scan QR code');
+        }
+      });
+    });
+    
+    Instascan.Camera.getCameras().then(function(cameras) {
+      if (cameras.length > 0) {
+        scanner.start(cameras[currentCameraIndex]);
+        document.getElementById('switchCameraButton').addEventListener('click', function() {
+          currentCameraIndex = (currentCameraIndex + 1) % cameras.length;
+          scanner.stop();
+          scanner.start(cameras[currentCameraIndex]);
+        });
+      } else {
+        console.error('No cameras found.');
+        $('#status').addClass('error').text('Error: No cameras found');
+      }
+    }).catch(function(e) {
+      console.error(e);
+      $('#status').addClass('error').text('Error: Failed to access camera');
+    });
+  </script>
+
+</body>
+</html>

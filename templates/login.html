@@ -1,0 +1,176 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="icon" type="image/x-icon" href="{% static 'core/logo/logo.png' %}">
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Leonapp - Accedi</title>
+    <!-- <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;500;700&display=swap" rel="stylesheet"> -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+    <meta name="description" content="L'app degli studenti del LeoneXIII è live!" />
+    <meta property="og:title" content="Leonapp - LeoneXIII" />
+    <meta property="og:image" content="{% static 'core/logo/logo.png' %}" />
+</head>
+<body>
+  <section class="container">
+    <div class="columns is-multiline">
+      <div class="column is-8 is-offset-2 register">
+        <div class="columns">
+          <div class="column left">
+            <h1 class="title is-1">Leonapp</h1>
+            <h2 class="subtitle colored is-4">L'app degli studenti del Leone XIII.</h2>
+            <p>
+              Leonapp inizia il suo viaggio come una semplice soluzione per vendere le focaccine durante l'intervallo, 
+              ma mira ad andare ben oltre le focaccine. 
+              Leonapp è in continuo sviluppo per diventare il cuore pulsante della comunità leoniana.
+            </p>
+          </div>
+          <div class="column right has-text-centered">
+            <h1 class="title is-4">Accedi</h1>
+            <p class="description">Attualmente, puoi accedere solo se sei un partecipante della 
+              versione Beta di LEONAPP</p>
+            <form method="post">
+              {% csrf_token %}
+              <div class="field">
+                <div class="control">
+                  <input class="input is-medium" type="email" placeholder="Email" id="id_email" name="email" required>
+                </div>
+              </div>
+
+              <div class="field">
+                <div class="control">
+                  <input class="input is-medium" type="password" placeholder="Password" id="id_password" name="password" required>
+                </div>
+                {% if error_message %}
+                <p class="help is-danger">{{ error_message }}</p>
+                {% endif %}
+              </div>
+              <button class="button is-block is-primary is-fullwidth is-medium" type="submit">Accedi</button>
+              <br />
+              <small><em>Non hai un account? <a href="{% url 'signup' %}">Registrati</a></em></small>
+            </form>
+          </div>
+        </div>
+      </div>
+      <div class="column is-8 is-offset-2">
+        <br>
+        <nav class="level">
+          <div class="level-left">
+            <div class="level-item">
+              <!-- <span class="icon">
+                <i class="fab fa-twitter"></i>
+              </span> &emsp;
+              <span class="icon">
+                <i class="fab fa-facebook"></i>
+              </span> &emsp; -->
+              <a href="https://www.instagram.com/lindniele"><span class="icon">
+                <i class="fab fa-instagram"></i>
+              </span></a> &emsp;
+              <a href="https://www.instagram.com/niccolo_pagano"><span class="icon">
+                <i class="fab fa-instagram"></i>
+              </span></a> &emsp;
+              <a href="https://github.com/leonapp-project/"><span class="icon">
+                <i class="fab fa-github"></i>
+              </span></a> &emsp;
+              <!-- <span class="icon">
+                <i class="fas fa-envelope"></i>
+              </span> -->
+            </div>
+          </div>
+          <div class="level-right">
+            <small class="level-item" style="color: var(--textLight)">
+              Tutti i diritti riservati &copy; LEONAPP
+            </small>
+          </div>
+        </nav>
+      </div>
+    </div>
+  </section>
+</body>
+<style>
+  :root {
+    --brandColor: hsl(166, 67%, 51%);
+    --background: rgb(247, 247, 247);
+    --textDark: hsla(0, 0%, 0%, 0.66);
+    --textLight: hsla(0, 0%, 0%, 0.33);
+  }
+
+  body {
+    background: var(--background);
+    height: 100vh;
+    color: var(--textDark);
+  }
+
+  .field:not(:last-child) {
+    margin-bottom: 1rem;
+  }
+
+  .register {
+    margin-top: 10rem;
+    background: white;
+    border-radius: 10px;
+  }
+
+  .left,
+  .right {
+    padding: 4.5rem;
+  }
+
+  .left {
+    border-right: 5px solid var(--background);
+  }
+
+  .left .title {
+    font-weight: 800;
+    letter-spacing: -2px;
+  }
+
+  .left .colored {
+    color: var(--brandColor);
+    font-weight: 500;
+    margin-top: 1rem !important;
+    letter-spacing: -1px;
+  }
+
+  .left p {
+    color: var(--textLight);
+    font-size: 1.15rem;
+  }
+
+  .right .title {
+    font-weight: 800;
+    letter-spacing: -1px;
+  }
+
+  .right .description {
+    margin-top: 1rem;
+    margin-bottom: 1rem !important;
+    color: var(--textLight);
+    font-size: 1.15rem;
+  }
+
+  .right small {
+    color: var(--textLight);
+  }
+
+  input {
+    font-size: 1rem;
+  }
+
+  input:focus {
+    border-color: var(--brandColor) !important;
+    box-shadow: 0 0 0 1px var(--brandColor) !important;
+  }
+
+  .fab,
+  .fas {
+    color: var(--textLight);
+    margin-right: 1rem;
+  }
+
+</style>
+</html>

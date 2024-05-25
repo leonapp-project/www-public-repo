@@ -1,0 +1,686 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}I miei biglietti{% endblock %}
+
+{% block content %}
+
+<style>
+    .ticket-card {
+        margin-bottom: 1.5rem;
+        /* Spacing between cards */
+    }
+
+    .ticket-card .card-content {
+        padding: 1.5rem;
+    }
+
+    /* Initially hide the QR code on smaller screens */
+    .qr-code-container {
+        display: none;
+    }
+
+    /* Show the QR code on screens wider than 769 pixels */
+    @media screen and (min-width: 769px) {
+        .qr-code-container {
+            display: block;
+        }
+    }
+
+
+    @media screen and (max-width: 768px) {
+        .ticket-card .columns {
+            display: block;
+        }
+
+        .ticket-card .column.is-3 {
+            margin-top: 1rem;
+        }
+
+        .ticket-card .image {
+            margin-left: auto;
+            margin-right: auto;
+        }
+    }
+
+    @media screen and (min-width: 1024px) and (max-width: 1215px) {
+        .ticket-card .column.is-9 {
+            flex: none;
+            width: 64%;
+        }
+    }
+
+    @media screen and (min-width: 1216px) and (max-width: 1407px) {
+        .ticket-card .column.is-9 {
+            flex: none;
+            width: 70%;
+        }
+    }
+
+    .date-badge {
+        display: inline-block;
+        background-color: #3273dc;
+        /* Bulma primary color */
+        color: white;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        text-align: center;
+        font-weight: bold;
+        margin-top: 0.5rem;
+        /* Adjust based on your layout */
+        white-space: nowrap;
+    }
+
+    .date-day,
+    .date-time {
+        padding: 0 0.5rem;
+        /* Horizontal padding */
+    }
+
+    .date-day::after {
+        content: "|";
+        margin-left: 0.5rem;
+        color: rgba(255, 255, 255, 0.5);
+        /* Lighter separator to reduce visual clutter */
+    }
+
+    .date-time {
+        padding-left: 0.5rem;
+        /* Space after the separator */
+    }
+
+
+
+
+    .used-ticket {
+        background-color: #f0f0f0;
+        /* A light grey to indicate it's no longer active */
+    }
+
+    .used-ticket .title,
+    .used-ticket .subtitle {
+        color: #a0a0a0;
+        /* A muted color to indicate used status */
+    }
+
+
+
+
+
+    .empty-state {
+        margin-top: 2em;
+        padding: 2em;
+        text-align: center;
+        /* Center the text */
+    }
+
+    .empty-state .image {
+        margin-bottom: 1em;
+        /* Space below the image */
+    }
+
+    .empty-state p {
+        color: #707070;
+        /* A neutral color for the text */
+        font-weight: bold;
+        /* If you want the text to be bold */
+    }
+
+
+    /* <!-- TEMPORANEO: CSS da spostare in un file separato--> */
+    #redeem-modal .modal-content {
+        width: auto;
+        max-width: 400px;
+        margin: auto;
+    }
+
+    #redeem-modal .box {
+        padding: 2rem;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    #redeem-modal .title {
+        margin-bottom: 1rem;
+    }
+
+    #redeem-modal .image {
+        margin: 2rem 0;
+    }
+
+    #redeem-modal .modal-close {
+        background: none;
+    }
+
+    #redeem-modal .input {
+        border-right: none;
+    }
+
+    #redeem-modal .button {
+        border-left: none;
+    }
+</style>
+
+<style>
+    .ticket {
+        font-family: 'Roboto', sans-serif;
+        /* Use a font that resembles ticket prints */
+        /* max-width: 300px; */
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        background: #f9f9f9 url('https://i.pinimg.com/236x/6d/0a/27/6d0a27d615b6b2671d1a80bd55a5b2d6.jpg');
+        box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
+        margin: 20px;
+        transform: rotate(-3deg);
+        /* Slight rotation for a casual look */
+        overflow: hidden;
+        /* Keeps the child elements within the rounded corners */
+    }
+
+    .ticket-header {
+        border-bottom: 1px dashed #ccc;
+        padding: 10px;
+        background: rgba(255, 255, 255, 0.9);
+        position: relative;
+    }
+
+    .ticket-title {
+        margin: 0;
+    }
+
+    .ticket-value {
+        position: absolute;
+        right: 10px;
+        top: 10px;
+        font-weight: bold;
+    }
+
+    .ticket-body {
+        display: flex;
+        /* Enable flexbox */
+        justify-content: space-between;
+        /* Space out the child elements */
+        padding: 10px;
+        align-items: center;
+        /* Align items vertically */
+    }
+
+    .ticket-info {
+        margin: 5px 0;
+    }
+
+    .ticket-date,
+    .ticket-number {
+        font-weight: bold;
+    }
+
+
+
+    .ticket-details {
+        flex-grow: 1;
+        /* Allow ticket details to fill available space */
+    }
+
+    .ticket-qr {
+        /* Optionally add padding if needed */
+        padding-left: 10px;
+        /* Add space between details and QR code */
+        flex-shrink: 0;
+        /* Prevent the QR code from shrinking */
+    }
+
+    .ticket-qr img {
+        max-width: 100px;
+        /* Set a max-width for the QR code */
+        height: auto;
+        /* Keep the aspect ratio */
+    }
+
+    .ticket.used .ticket-header,
+    .ticket.used .ticket-body {
+        background-color: #e0e0e0;
+        /* A light gray to indicate used status */
+    }
+
+    .ticket.used .ticket-title::after {
+        content: "CONSUMATO";
+        color: #ff0000;
+        /* Red color for attention */
+        font-weight: bold;
+        position: absolute;
+        right: 10px;
+        top: 10px;
+        font-size: 0.75em;
+    }
+
+    .ticket.used .ticket-qr img {
+        opacity: 0.3;
+        /* Fade out the QR code */
+    }
+
+    .ticket.used .ticket-details .ticket-info .ticket-number {
+        text-decoration: line-through;
+        /* Strikethrough the ticket number */
+    }
+
+    /* Example of a watermark or badge indicating the ticket is used */
+    .ticket.used::before {
+        content: "USATO";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) rotate(-45deg);
+        font-size: 3em;
+        color: rgba(255, 0, 0, 0.5);
+        /* Semi-transparent red */
+        z-index: 1;
+        pointer-events: none;
+        /* Allows clicking through the text */
+    }
+
+    .ticket.pending .ticket-header,
+    .ticket.pending .ticket-body {
+        background-color: #fff3cd;
+        /* A light yellow to indicate pending status */
+    }
+
+    .ticket.pending .ticket-title::after {
+        content: "IN ATTESA";
+        color: #856404;
+        /* A darker yellow-brown text for contrast */
+        font-weight: bold;
+        position: absolute;
+        right: 10px;
+        top: 10px;
+        font-size: 0.75em;
+    }
+
+    .ticket.pending .ticket-qr img {
+        opacity: 0.5;
+        /* Slightly fade out the QR code */
+    }
+
+    .ticket.pending::before {
+        content: "ATTESA";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) rotate(-45deg);
+        font-size: 3em;
+        color: rgba(255, 193, 7, 0.5);
+        /* Semi-transparent yellow */
+        z-index: 1;
+        pointer-events: none;
+        /* Allows clicking through the text */
+    }
+</style>
+
+<div class="tabs is-boxed is-centered">
+    <ul>
+        <li class="is-active" data-tab="unused">
+            <a>
+                <span class="icon is-small"><i class="fas fa-ticket-alt" aria-hidden="true"></i></span>
+                <span>{{ tab_names.unused }}</span>
+            </a>
+        </li>
+        <li data-tab="used">
+            <a>
+                <span class="icon is-small"><i class="fas fa-check-circle" aria-hidden="true"></i></span>
+                <span>{{ tab_names.used }}</span>
+            </a>
+        </li>
+        <li data-tab="pending">
+            <a>
+                <span class="icon is-small"><i class="fas fa-hourglass-half" aria-hidden="true"></i></span>
+                <span>{{ tab_names.pending }}</span>
+            </a>
+        </li>
+    </ul>
+</div>
+
+<section class="section">
+    <div class="container">
+        <div class="columns is-multiline is-justify-content-center">
+            <div class="column is-12 is-6-desktop">
+
+                <div id="tab-content">
+                    <div class="tab-pane is-active" id="unused">
+
+                        {% for ticket in unused_tickets %}
+                        <!-- Display each unused ticket -->
+                        <div class="ticket ticket-unused" data-ticket-code="{{ ticket.ticket_code }}">
+                            <div class="ticket-header">
+                                <h3 class="ticket-title">BUONO FOCACCINA</h3>
+                                <span class="ticket-value">€1.20</span>
+                            </div>
+                            <div class="ticket-body">
+                                <div class="ticket-details">
+                                    <p class="ticket-info">Acquistato il <span class="ticket-date">
+                                            {{ ticket.date_created|date:"d/m/y" }}
+                                        </span></p>
+                                    <p class="ticket-info">Codice: <span class="ticket-number">
+                                            {{ ticket.ticket_code }}
+                                        </span></p>
+                                    <!-- Add other ticket details here -->
+                                </div>
+                                <div class="ticket-qr">
+                                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=128x128&data={{ ticket.ticket_code }}"
+                                        alt="QR Code">
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Display each unused ticket -->
+                        <!-- <div class="column is-12">
+                            <div class="card ticket-card" data-target="redeem-modal"
+                                data-ticket-code="{{ ticket.ticket_code }}">
+                                <div class="card-content">
+                                    <div class="columns is-vcentered">
+                                        <div class="column is-9">
+                                            <p class="title is-4">BUONO FOCACCINA</p>
+                                            <p class="subtitle is-6">Stato: DISPONIBILE</p>
+                                            <div class="date-badge">
+                                                <span class="date-day">{{ ticket.date_created|date:"d M" }}</span>
+                                                <span class="date-time">{{ ticket.date_created|date:"H:i" }}</span>
+                                            </div>
+                                        </div>
+                                        <div class="column is-3 has-text-right qr-code-container">
+                                            <figure class="image is-128x128">
+                                                <img src="https://api.qrserver.com/v1/create-qr-code/?size=128x128&data={{ ticket.ticket_code }}"
+                                                    alt="QR Code">
+                                            </figure>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div> -->
+                        {% empty %}
+                        <div class="empty-state has-text-centered">
+                            <figure class="image is-inline-block">
+                                <img src="{% static 'focaccine/empty_state/empty_state_pizza.png' %}"
+                                    alt="Nessun biglietto disponibile">
+                            </figure>
+                            <p class="title is-4">Nessun biglietto</p>
+                            <p class="subtitle is-6">Qui trovi i tuoi biglietti non utilizzati.</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <div class="tab-pane" id="used">
+                        {% for ticket in used_tickets %}
+                        <!-- Display each used ticket -->
+                        <div class="ticket used">
+                            <div class="ticket-header">
+                                <h3 class="ticket-title">BUONO FOCACCINA</h3>
+                                <span class="ticket-value">€1.20</span>
+                            </div>
+                            <div class="ticket-body">
+                                <div class="ticket-details">
+                                    <p class="ticket-info">Acquistato il <span class="ticket-date">
+                                            {{ ticket.date_created|date:"d/m/y" }}
+                                        </span></p>
+                                    <p class="ticket-info">Codice: <span class="ticket-number">
+                                            {{ ticket.ticket_code }}
+                                        </span></p>
+                                    <!-- Add other ticket details here -->
+                                </div>
+                                <div class="ticket-qr">
+                                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=128x128&data={{ ticket.ticket_code }}"
+                                        alt="QR Code">
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Display each used ticket -->
+                        <!-- <div class="column is-12">
+                            <div class="card ticket-card used-ticket">
+                                <div class="card-content">
+                                    <div class="columns is-vcentered">
+                                        <div class="column is-9">
+                                            <p class="title is-4">BUONO FOCACCINA</p>
+                                            <p class="subtitle is-6">Stato: UTILIZZATO</p>
+                                            <p class="has-text-weight-semibold">
+                                                Usato il {{ ticket.date_used|date:"d M"}} alle
+                                                {{ ticket.date_used|date:"H:i" }}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div> -->
+
+                        {% empty %}
+                        <div class="empty-state has-text-centered">
+                            <figure class="image is-inline-block">
+                                <img src="{% static 'focaccine/empty_state/empty_state_pizza.png' %}"
+                                    alt="Nessun biglietto disponibile">
+                            </figure>
+                            <p class="title is-4">Nessun biglietto</p>
+                            <p class="subtitle is-6">Qui trovi l'elenco dei biglietti che hai già utilizzato.</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <div class="tab-pane" id="pending">
+                        {% for ticket in pending_tickets %}
+                        <!-- Display each pending tickets -->
+                        <div class="ticket pending">
+                            <div class="ticket-header">
+                                <h3 class="ticket-title">BUONO FOCACCINA</h3>
+                                <span class="ticket-value">€1.20</span>
+                            </div>
+                            <div class="ticket-body">
+                                <div class="ticket-details">
+                                    <p class="ticket-info">Acquistato il <span class="ticket-date">
+                                            {{ ticket.date_created|date:"d/m/y" }}
+                                        </span></p>
+                                    <p class="ticket-info">Codice: <span class="ticket-number">
+                                            {{ ticket.ticket_code }}
+                                        </span></p>
+                                    <!-- Add other ticket details here -->
+                                </div>
+                                <div class="ticket-qr">
+                                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=128x128&data={{ ticket.ticket_code }}"
+                                        alt="QR Code">
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Display each pending tickets -->
+                        <!-- <div class="column is-12">
+                            <div class="card ticket-card used-ticket">
+                                <div class="card-content">
+                                    <div class="columns is-vcentered">
+                                        <div class="column is-9">
+                                            <p class="title is-4">BUONO FOCACCINA</p>
+                                            <p class="subtitle is-6">Il tuo biglietto è in attesa di conferma</p>
+                                            <p class="has-text-weight-semibold">
+                                                Codice biglietto: {{ ticket.ticket_code }}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div> -->
+                        {% empty %}
+                        <div class="empty-state has-text-centered">
+                            <figure class="image is-inline-block">
+                                <img src="{% static 'focaccine/empty_state/empty_state_pizza.png' %}"
+                                    alt="Nessun biglietto disponibile">
+                            </figure>
+                            <p class="title is-4">Nessun biglietto</p>
+                            <p class="subtitle is-6">I biglietti in attesa sono quei biglietti che non sono ancora stati
+                                confermati. Potrebbero essere in fase di elaborazione o in attesa di ulteriori azioni da
+                                parte tua o del fornitore.</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- Modal with QR Code to redeem ticket-->
+<div id="redeem-modal" class="modal">
+
+    <div class="modal-background"></div>
+    <div class="modal-content">
+
+        <div class="box">
+            <div class="has-text-centered">
+                <h3 class="title is-4">Scansiona il codice QR</h3>
+                <p>Per riscattare il buono, fai scansionare il codice QR dalla signora delle focaccine</p>
+                <figure class="image is-inline-block">
+                    <img id="modal-qr-image" src="" alt="QR Code" width="300" height="300">
+                </figure>
+                <div class="mt-4">
+                    <div class="field has-addons has-addons-centered">
+                        <div class="control is-expanded">
+                            <input class="input" id="ticket-code" type="text" value="" readonly>
+                        </div>
+                        <div class="control">
+                            <button class="button" id="copy-button">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <button class="modal-close is-large" aria-label="close"></button>
+</div>
+
+{% endblock %}
+
+{% block javascript %}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const tabs = document.querySelectorAll('.tabs li');
+        const tabContents = document.querySelectorAll('.tab-pane');
+
+        // Hide all tab contents except the active one
+        hideAllTabContents();
+        showActiveTabContent();
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', function () {
+                // Remove 'is-active' from all tabs
+                tabs.forEach(t => t.classList.remove('is-active'));
+
+                // Add 'is-active' to clicked tab
+                this.classList.add('is-active');
+
+                // Hide all tab contents and show the content of clicked tab
+                hideAllTabContents();
+                const target = this.getAttribute('data-tab');
+                document.getElementById(target).style.display = 'block';
+            });
+        });
+
+        function hideAllTabContents() {
+            tabContents.forEach(content => {
+                content.style.display = 'none';
+            });
+        }
+
+        function showActiveTabContent() {
+            const activeTab = document.querySelector('.tabs li.is-active');
+            if (activeTab) {
+                const activeTabContentId = activeTab.getAttribute('data-tab');
+                const activeTabContent = document.getElementById(activeTabContentId);
+                if (activeTabContent) {
+                    activeTabContent.style.display = 'block';
+                }
+            }
+        }
+
+
+        // const cards = document.querySelectorAll('.ticket-card');
+        // const modal = document.getElementById('redeem-modal');
+        // const modalClose = modal.querySelector('.modal-close');
+        // const modalQrImage = modal.querySelector('#modal-qr-image');
+        // const ticketCodeInput = modal.querySelector('#ticket-code');
+
+        // cards.forEach(card => {
+        //     card.addEventListener('click', () => {
+        //         // Get the ticket code from the clicked card
+        //         const ticketCode = card.getAttribute('data-ticket-code');
+        //         // Set the QR code image src attribute in the modal
+        //         modalQrImage.src = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${ticketCode}`;
+        //         // Set the ticket code value
+        //         ticketCodeInput.value = ticketCode;
+        //         // Show the modal
+        //         modal.classList.add('is-active');
+        //     });
+        // });
+
+        // // Close the modal when the close button is clicked
+        // modalClose.addEventListener('click', () => {
+        //     modal.classList.remove('is-active');
+        // });
+
+        // // Optionally, close the modal when the background is clicked
+        // modal.addEventListener('click', (e) => {
+        //     if (e.target.classList.contains('modal-background')) {
+        //         modal.classList.remove('is-active');
+        //     }
+        // });
+
+
+        // Get only unused tickets
+        const unusedTickets = document.querySelectorAll('.ticket.ticket-unused');
+
+        // Get the modal and elements within it that we need to update
+        const modal = document.getElementById('redeem-modal');
+        const modalQrImage = modal.querySelector('#modal-qr-image');
+        const ticketCodeInput = modal.querySelector('#ticket-code');
+        const modalClose = modal.querySelector('.modal-close');
+
+        // Function to open the modal with the right data
+        const openModal = (ticketCode) => {
+            modal.classList.add('is-active');
+            modalQrImage.src = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${ticketCode}`;
+            ticketCodeInput.value = ticketCode;
+        };
+
+        // Add click event to each unused ticket
+        unusedTickets.forEach(ticket => {
+            ticket.addEventListener('click', () => {
+                const ticketCode = ticket.getAttribute('data-ticket-code');
+                openModal(ticketCode);
+            });
+        });
+
+        // Close the modal when the close button is clicked
+        modalClose.addEventListener('click', () => {
+            modal.classList.remove('is-active');
+        });
+
+        // Optionally, close the modal when the background is clicked
+        modal.addEventListener('click', (event) => {
+            if (event.target.classList.contains('modal-background')) {
+                modal.classList.remove('is-active');
+            }
+        });
+
+
+
+        const copyButton = document.getElementById('copy-button');
+        copyButton.addEventListener('click', () => {
+            const ticketCode = document.getElementById('ticket-code');
+            navigator.clipboard.writeText(ticketCode.value)
+                .then(() => {
+                    // Handle successful copy action, e.g., showing a tooltip or changing button text
+                })
+                .catch(err => {
+                    // Handle errors, such as when the user denies clipboard permissions
+                });
+        });
+    });
+
+</script>
+{% endblock %}
+
+
+
+
+</html>

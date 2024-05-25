@@ -1,0 +1,279 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Focaccine{% endblock %}
+
+{% block content %}
+<!--Product Information-->
+<section class="section">
+    <div class="container">
+        <div class="mb-6 pb-3 columns is-multiline">
+            <div class="column is-12 is-6-desktop mx-auto has-text-centered">
+                <h2 class="mb-4 is-size-1 is-size-3-mobile has-text-weight-bold">Le mie focaccine</h2>
+                <p class="subtitle has-text-grey mb-5">Per acquistare le focaccine, è necessario acquistare i
+                    blocchi da 10 biglietti.
+                    Ogni biglietto ti consente di acquistare una focaccina.</p>
+                <p class="is-size-4 has-text-weight-semibold mb-2">
+                    {% if number_of_tickets %}
+                    Hai a disposizione {{number_of_tickets}} biglietti per le focaccine
+                    {% else %}
+                    Non hai nessun biglietto
+                    {% endif %}
+                </p>
+                <div class="mt-5 buttons is-centered">
+                    <div class="buttons is-centered">
+                        {% if number_of_tickets %}
+                        <!-- <a href="{% url 'focaccine-qrcode' %}" class="mr-3 button is-primary is-medium">
+                                <span class="icon">
+                                    <i class="fa-solid fa-pizza-slice"></i>
+                                </span>
+                                <span>Usa un biglietto</span>
+                            </a> -->
+                        <button class="mr-3 button is-info is-medium modal-button is-rounded" data-target="modal-qr"
+                            aria-haspopup="true">
+                            <span class="icon">
+                                <i class="fa-solid fa-pizza-slice"></i>
+                            </span>
+                            <span>Usa un biglietto</span>
+                        </button>
+                        {% endif %}
+                        <button id="buy-block-button" class="mr-3 button is-warning is-medium is-rounded">
+                            <span class="icon">
+                                <i class="fa-solid fa-ticket"></i>
+                            </span>
+                            <span>Compra un blocco</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="columns is-multiline">
+            <div class="column is-block-desktop">
+                <img class="mx-auto mt-0-widescreen is-block image"
+                    src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/94/Starry_Night_Over_the_Rhone.jpg/1280px-Starry_Night_Over_the_Rhone.jpg" alt="">
+            </div>
+        </div>
+    </div>
+</section>
+
+{% if number_of_tickets %}
+<!-- Modal with QR Code to redeem ticket-->
+<div id="modal-qr" class="modal">
+    <div class="modal-background"></div>
+    <div class="modal-content">
+
+        <div class="box">
+            <div class="has-text-centered">
+                <h3 class="title is-4">Scansiona il codice QR</h3>
+                <p>Per riscattare il buono, fai scansionare il codice QR dalla signora delle focaccine</p>
+                <figure class="image is-inline-block">
+                    <img id="qr-code"
+                        src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data={{ticket_code}}"
+                        alt="QR Code" width="300" height="300">
+                </figure>
+                <div class="mt-4">
+                    <div class="field has-addons has-addons-centered">
+                        <div class="control is-expanded">
+                            <input class="input" id="ticket-code" type="text" value="{{ticket_code}}" readonly>
+                        </div>
+                        <div class="control">
+                            <button class="button" id="copy-button">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <button class="modal-close is-large" aria-label="close"></button>
+</div>
+{% endif %}
+
+<!-- TEMPORANEO: CSS da spostare in un file separato-->
+<style>
+    #modal-qr .modal-content {
+        width: auto;
+        max-width: 400px;
+        margin: auto;
+    }
+
+    #modal-qr .box {
+        padding: 2rem;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    #modal-qr .title {
+        margin-bottom: 1rem;
+    }
+
+    #modal-qr .image {
+        margin: 2rem 0;
+    }
+
+    #modal-qr .modal-close {
+        background: none;
+    }
+
+    #modal-qr .input {
+        border-right: none;
+    }
+
+    #modal-qr .button {
+        border-left: none;
+    }
+</style>
+
+
+<!-- Modal dialog -->
+<div class="modal" id="buy-block-modal">
+    <div class="modal-background"></div>
+    <div class="modal-card">
+        <header class="modal-card-head">
+            <p class="modal-card-title">Conferma Acquisto Biglietti</p>
+            <button class="delete" aria-label="close"></button>
+        </header>
+        <section class="modal-card-body">
+            <div class="content">
+                <p>Stai per acquistare un blocco da 10 biglietti per le focaccine. Questa azione comporterà un
+                    addebito
+                    di <strong>€12</strong> sulla tua retta scolastica.</p>
+                <p><strong>Avviso di Responsabilità</strong>: Una volta acquistati i biglietti, sei l'unico
+                    responsabile
+                    della loro custodia e utilizzo. In caso di utilizzo dei tuoi biglietti da parte di un compagno o
+                    di
+                    un'altra persona a causa di accesso non autorizzato al tuo account, non ci riteniamo
+                    responsabili.
+                    Assicurati di mantenere le credenziali del tuo account al sicuro e di non condividere le
+                    informazioni di accesso con altri.</p>
+                <p>Cliccando su "Conferma", accetti queste condizioni e l'addebito di 12€ sulla tua retta
+                    scolastica.
+                </p>
+            </div>
+        </section>
+        <footer class="modal-card-foot">
+            <form method="POST">
+                {% csrf_token %}
+                <button type="submit" class="button is-danger">Conferma</button>
+            </form>
+            <button class="ml-3 button" aria-label="close">Annulla</button>
+        </footer>
+    </div>
+</div>
+
+<!-- Footer -->
+<footer class="section">
+    <div class="container">
+        <div class="pb-5 is-flex is-flex-wrap-wrap is-justify-content-between is-align-items-center">
+            <div class="mr-auto mb-2">
+                <a class="is-inline-block" href="#">
+                    <img class="image" src="{% static 'core/logo/logo_text.png' %}" alt="" width="96px"></a>
+            </div>
+            <!-- <div>
+                <ul class="is-flex is-flex-wrap-wrap is-align-items-center is-justify-content-center">
+                    <li class="mr-4"><a class="button is-white" href="#">About</a></li>
+                    <li class="mr-4"><a class="button is-white" href="#">Company</a></li>
+                    <li class="mr-4"><a class="button is-white" href="#">Services</a></li>
+                    <li><a class="button is-white" href="#">Testimonials</a></li>
+                </ul>
+            </div> -->
+        </div>
+    </div>
+    <div class="pt-5" style="border-top: 1px solid #dee2e6;"></div>
+    <div class="container">
+        <div class="is-flex-tablet is-justify-content-between is-align-items-center">
+            <p>Tutti i diritti riservati © LEONAPP</p>
+            <div class="py-2 is-hidden-tablet"></div>
+            <div class="ml-auto">
+                <a class="mr-4 is-inline-block" href="https://github.com/leonapp-project/">
+                    <span class="icon">
+                        <i class="fa-brands fa-github"></i>
+                      </span></a>
+                <a class="mr-4 is-inline-block" href="https://www.instagram.com/lindniele">
+                    <i class="fa-brands fa-instagram"></i>
+                </a>
+                <a class="mr-4 is-inline-block" href="https://www.instagram.com/niccolo_pagano">
+                    <i class="fa-brands fa-instagram"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</footer>
+{% endblock %}
+
+
+{% block javascript %}
+<!-- JavaScript -->
+<script>
+    // Gestione della modal "Acquisto Blocco Biglietti"
+    // Get the buy block button and modal dialog
+    const buyBlockButton = document.getElementById("buy-block-button");
+    const buyBlockModal = document.getElementById("buy-block-modal");
+
+    // Show the modal dialog when the buy block button is clicked
+    buyBlockButton.addEventListener("click", () => {
+        buyBlockModal.classList.add("is-active");
+    });
+
+    // Hide the modal dialog when the close button or overlay is clicked
+    buyBlockModal.addEventListener("click", (event) => {
+        if (
+            event.target.classList.contains("modal-background") ||
+            event.target.classList.contains("delete") ||
+            event.target.getAttribute("aria-label") === "close"
+        ) {
+            buyBlockModal.classList.remove("is-active");
+        }
+    });
+</script>
+
+{% if number_of_tickets %}
+<!-- <script src="https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"></script> -->
+<script type="text/javascript">
+    // Gestione della modal "Riscatta Buono"
+    const redeemVoucherButton = document.querySelector('.modal-button[data-target="modal-qr"]');
+    const redeemVoucherModal = document.getElementById("modal-qr");
+
+    redeemVoucherButton.addEventListener("click", () => {
+        redeemVoucherModal.classList.add("is-active");
+    });
+
+    redeemVoucherModal.addEventListener("click", (event) => {
+        if (
+            event.target.classList.contains("modal-background") ||
+            event.target.classList.contains("modal-close")
+        ) {
+            redeemVoucherModal.classList.remove("is-active");
+        }
+    });
+
+    // // Generate QR code using qrcode library
+    // var ticketCode = "{{ ticket_code }}";
+    // var qrCode = new QRCode(document.getElementById("qr-code"), {
+    //     text: ticketCode,
+    //     width: 300,
+    //     height: 300,
+    //     colorDark: "#000000",
+    //     colorLight: "#ffffff",
+    //     correctLevel: QRCode.CorrectLevel.H
+    // });
+
+    const copyButton = document.getElementById('copy-button');
+    copyButton.addEventListener('click', () => {
+        const ticketCode = document.getElementById('ticket-code');
+        navigator.clipboard.writeText(ticketCode.value)
+            .then(() => {
+                // Handle successful copy action, e.g., showing a tooltip or changing button text
+            })
+            .catch(err => {
+                // Handle errors, such as when the user denies clipboard permissions
+            });
+    });
+
+</script>
+{% endif %}
+
+{% endblock %}
+
+</html>

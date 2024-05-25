@@ -1,0 +1,219 @@
+<!-- profile.html -->
+
+{% extends 'base.html' %}
+
+{% block title %}Profilo{% endblock %}
+
+{% block css %}
+<style>
+    :root {
+      --brandColor: hsl(166, 67%, 51%);
+      /* --background: rgb(247, 247, 247); */
+      --textDark: hsla(0, 0%, 0%, 0.66);
+      --textLight: hsla(0, 0%, 0%, 0.33);
+    }
+
+    body {
+      background: var(--background);
+      height: 100vh;
+      color: var(--textDark);
+    }
+
+    .field:not(:last-child) {
+      margin-bottom: 1rem;
+    }
+
+    /* .register {
+      margin-top: 10rem;
+      background: white;
+      border-radius: 10px;
+    } */
+
+    .left,
+    .right {
+      padding: 4.5rem;
+    }
+
+    /* left is not used in profile.html, because the css style is borrowed from login.html and signup.html*/
+    .left {
+      border-right: 5px solid var(--background);
+    }
+
+    .left .title {
+      font-weight: 800;
+      letter-spacing: -2px;
+    }
+
+    .left .colored {
+      color: var(--brandColor);
+      font-weight: 500;
+      margin-top: 1rem !important;
+      letter-spacing: -1px;
+    }
+
+    .left p {
+      color: var(--textLight);
+      font-size: 1.15rem;
+    }
+
+    .right .title {
+      font-weight: 800;
+      letter-spacing: -1px;
+    }
+
+    .right .description {
+      margin-top: 1rem;
+      margin-bottom: 1rem !important;
+      color: var(--textLight);
+      font-size: 1.15rem;
+    }
+
+    .right small {
+      color: var(--textLight);
+    }
+
+    input {
+      font-size: 1rem;
+    }
+
+    input:focus {
+      border-color: var(--brandColor) !important;
+      box-shadow: 0 0 0 1px var(--brandColor) !important;
+    }
+
+    .fab,
+    .fas {
+      color: var(--textLight);
+      margin-right: 1rem;
+    }
+
+
+    /* New style */
+    .label {
+        color: var(--textDark);
+        font-weight: 700;
+        margin-bottom: 0.5rem; /* Ensure spacing between label and input */
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- <h2>User Profile</h2>
+<h2>User Profile</h2>
+<div class="user-info">
+    <p>First name: {{ user.first_name }}</p>
+    <p>Last name: {{ user.last_name }}</p>
+    <p>Email: {{ user.email }}</p>
+    <p>Class: {{ class_number_display }} {{ class_section_display }}</p>
+</div>
+
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Save Changes</button>
+</form> -->
+
+<section class="container">
+  <div class="columns is-multiline">
+      <!-- <div class="column is-8 is-offset-2 register"> -->
+      <div class="column is-8 is-offset-2">
+          <div class="column right">
+              <h1 class="title is-1">Your Profile</h1>
+              <p class="description">View and update your profile details.</p>
+
+              {% if messages %}
+              <ul class="messages">
+                {% for message in messages %}
+                  <p class="{% if message.tags %}{{ message.tags }}{% endif %} help is-success">{{ message }}</p>
+                {% endfor %}
+              </ul>
+              {% endif %}
+
+              {% if form.non_field_errors %}
+                  {% for error in form.non_field_errors %}
+                      <p class="help is-danger">{{ error }}</p>
+                  {% endfor %}
+              {% endif %}
+
+              <form method="post" action="{% url 'user_profile' %}">
+                  {% csrf_token %}
+                  <!-- Username -->
+                  <div class="field">
+                    <label class="label" for="id_username">Username</label>
+                    <div class="control">
+                        <input class="input is-medium {% if form.username.errors %}is-danger{% endif %}" 
+                               type="text" name="username" id="id_username" 
+                               placeholder="Username" value="{{ form.username.value|default_if_none:'' }}" required>
+                        {% if form.username.errors %}
+                            {% for error in form.username.errors %}
+                                <p class="help is-danger">{{ error }}</p>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                </div>
+                  <!-- {{ form.as_p }} -->
+
+                  <!-- First Name -->
+                  <div class="field">
+                      <label class="label">First Name</label>
+                      <div class="control">
+                          <input class="input is-medium" type="text" placeholder="First Name" value="{{ user.first_name }}" disabled>
+                      </div>
+                  </div>
+
+                  <!-- Last Name -->
+                  <div class="field">
+                      <label class="label">Last Name</label>
+                      <div class="control">
+                          <input class="input is-medium" type="text" placeholder="Last Name" value="{{ user.last_name }}" disabled>
+                      </div>
+                  </div>
+
+                  <!-- Email -->
+                  <div class="field">
+                      <label class="label">Email</label>
+                      <div class="control">
+                          <input class="input is-medium" type="email" placeholder="Email" value="{{ user.email }}" disabled>
+                      </div>
+                  </div>
+
+                  <!-- Class -->
+                  <div class="field">
+                      <label class="label">Class</label>
+                      <div class="control">
+                          <input class="input is-medium" type="text" placeholder="Class" value="{{ user.get_class_number_display }} {{ user.get_class_section_display }}" disabled>
+                      </div>
+                  </div>
+
+                  <button class="button is-block is-primary is-fullwidth is-medium" id="update-button" disabled>Update</button>
+
+                  <br>
+                  <small><em>Please contact support to change other profile details.</em></small>
+              </form>
+          </div>
+      </div>
+  </div>
+</section>
+
+
+{% endblock %}
+
+
+{% block javascript %}
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    // Select the username input by id
+    const usernameInput = document.getElementById('id_username');
+    const updateButton = document.getElementById('update-button');
+
+    // Enable the update button if there's a change in the input value
+    usernameInput.addEventListener('input', () => {
+      const initialValue = "{{ user.username|default_if_none:'' }}";
+      updateButton.disabled = usernameInput.value === initialValue || !usernameInput.value.trim();
+    });
+
+    // Call the event listener function on page load to handle pre-filled values
+    usernameInput.dispatchEvent(new Event('input'));
+  });
+</script>
+{% endblock %}

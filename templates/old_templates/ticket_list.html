@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>I tuoi ticket</title>
+</head>
+<body>
+    <h1>Tickets</h1>
+    <ul>
+    {% for ticket in tickets %}
+        <li>{{ ticket.ticket_code }} - {{ ticket.status }} - {{ ticket.id }}</li>
+        <li>{{ ticket.date_created }} - {{ ticket.user.first_name }}</li>
+        <a href="/focaccine/{{ ticket.id }}/">Vedi</a>
+    {% empty %}
+        <li>No tickets found.</li>
+    {% endfor %}
+    </ul>
+</body>
+</html>

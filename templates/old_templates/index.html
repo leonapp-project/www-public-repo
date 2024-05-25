@@ -1,0 +1,141 @@
+{% load static %}
+<!DOCTYPE html>
+
+<html lang="it">
+
+<head>
+    <link rel="icon" type="image/x-icon" href="./src/img/logo.png">
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Leonapp - Focaccine</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.1/css/bulma.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+    <meta name="description" content="L'app degli studenti del LeoneXIII è live!" />
+    <meta property="og:title" content="Leonapp - LeoneXIII" />
+    <meta property="og:image" content="https://www.leonapp.it/src/img/banner.png" />
+</head>
+
+<body>
+    <!--navigation-->
+    <!-- <nav class="navbar has-shadow">
+        <div class="navbar-brand">
+            <a class="navbar-item">
+                <img src="assets/starbucks_logo.png" alt="Starbucks Logo" style="max-height: 90px" class="py-2 px-2" />
+            </a>
+            <a class="navbar-burger" id="burger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </a>
+        </div>
+        <div class="navbar-menu" id="nav-links">
+            <div class="navbar-start">
+
+                <a class="navbar-item has-text-weight-bold"> Menu </a>
+                <a class="navbar-item has-text-weight-bold"> Rewards </a>
+                <a class="navbar-item has-text-weight-bold"> Gift Cards</a>
+            </div>
+            <div class="navbar-end">
+                <a class="navbar-item">My Account</a>
+                <a class="navbar-item">Shopping Cart (0)</a>
+            </div>
+        </div>
+    </nav> -->
+
+    <!--breadcrumbs-->
+    <!-- <div class="section pt-4 pb-0">
+        <nav class="breadcrumb" aria-label="breadcrumbs">
+            <ul class="container">
+                <li>
+                    <a class="has-text-grey is-size-7-mobile">Starbucks Coffee</a>
+                </li>
+                <li><a class="has-text-grey is-size-7-mobile">Shop</a></li>
+                <li class="is-active">
+                    <a class="is-size-7-mobile">Mocha Cookie Crumble Frappuccino</a>
+                </li>
+            </ul>
+        </nav>
+    </div> -->
+    <!--Product Information-->
+    <section class="section">
+        <div class="container">
+            <div class="columns is-vcentered is-multiline">
+                <div class="column is-6-tablet is-4-desktop">
+                    <h1 class="is-size-3-mobile is-size-1-desktop title">
+                        Focaccine!
+                    </h1>
+                    {% if number_of_tickets %}
+                    <p class="mb-4">
+                        Hai a disposizione <strong>{{number_of_tickets}}</strong> biglietti
+                    </p>
+                    <a class="button is-primary" href="{% url 'focaccine-qrcode' %}">Usa un biglietto</a>
+                    {% else %}
+                    <p class="mb-4">
+                        Non hai nessun biglietto
+                    </p>
+                    {% endif %}
+                </div>
+                <div class="column is-6-tablet is-5-desktop has-text-centered">
+                    <img src="https://www.bassini1963.com/it/images/600x600/prodotto_grande1-8.png" alt="Mocha Cookie Crumble Frappuccino®"
+                        class="px-10" />
+                </div>
+                <div class="column is-12-tablet is-3-desktop">
+                    <p class="mb-4">
+                        Per acquistare le focaccine, è necessario acquistare i blocchi da 10 biglietti. 
+                        Ogni blocco da 10 biglietti ti consente di acquistare 10 focaccine.
+                    </p>
+                    <button id="buy-block-button" class="button is-warning">Compra un blocco</button>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Modal dialog -->
+    <div class="modal" id="buy-block-modal">
+        <div class="modal-background"></div>
+        <div class="modal-card">
+            <header class="modal-card-head">
+                <p class="modal-card-title">Conferma acquisto blocco</p>
+                <button class="delete" aria-label="close"></button>
+            </header>
+            <section class="modal-card-body">
+                Sei sicuro di voler acquistare un blocco da 10 biglietti?
+            </section>
+            <footer class="modal-card-foot">
+                <form method="POST">
+                    {% csrf_token %}
+                    <button type="submit" class="button is-danger">Sì, confermo</button>
+                </form>
+                <button class="button" aria-label="close">Annulla</button>
+            </footer>
+        </div>
+    </div>
+    
+    <script>
+        // Get the buy block button and modal dialog
+        const buyBlockButton = document.getElementById("buy-block-button");
+        const buyBlockModal = document.getElementById("buy-block-modal");
+    
+        // Show the modal dialog when the buy block button is clicked
+        buyBlockButton.addEventListener("click", () => {
+            buyBlockModal.classList.add("is-active");
+        });
+    
+        // Hide the modal dialog when the close button or overlay is clicked
+        buyBlockModal.addEventListener("click", (event) => {
+            if (
+                event.target.classList.contains("modal-background") ||
+                event.target.classList.contains("delete") ||
+                event.target.getAttribute("aria-label") === "close"
+            ) {
+                buyBlockModal.classList.remove("is-active");
+            }
+        });
+    </script>
+    
+    
+    <script src="js/index.js"></script>
+</body>
+
+</html>

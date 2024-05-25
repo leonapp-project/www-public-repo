@@ -1,0 +1,59 @@
+{#NO USAGE ANYMORE/YET#}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>I tuoi ticket</title>
+</head>
+
+<body>
+    <div class="tabs is-boxed">
+        <ul>
+            <li class="is-active" data-tab="unused"><a>{{ tab_names.unused }}</a></li>
+            <li data-tab="used"><a>{{ tab_names.used }}</a></li>
+            <li data-tab="other"><a>{{ tab_names.other }}</a></li>
+        </ul>
+    </div>
+
+    <div id="tab-content">
+        <div class="tab-pane is-active" id="unused">
+            {% for ticket in unused_tickets %}
+            <!-- Display each unused ticket -->
+            <li>{{ ticket.ticket_code }} - {{ ticket.status }} - {{ ticket.id }}</li>
+            <li>{{ ticket.date_created }} - {{ ticket.user.first_name }}</li>
+            <a href="/focaccine/{{ ticket.id }}/">Vedi</a>
+            {% empty %}
+            <li>No tickets found.</li>
+            {% endfor %}
+        </div>
+        <div class="tab-pane" id="used">
+            {% for ticket in used_tickets %}
+            <!-- Display each used ticket -->
+            <li>{{ ticket.ticket_code }} - {{ ticket.status }} - {{ ticket.id }}</li>
+            <li>{{ ticket.date_created }} - {{ ticket.user.first_name }}</li>
+            <a href="/focaccine/{{ ticket.id }}/">Vedi</a>
+            {% empty %}
+            <li>No tickets found.</li>
+            {% endfor %}
+        </div>
+        <div class="tab-pane" id="other">
+            {% for ticket in other_tickets %}
+            <!-- Display each other ticket -->
+            <li>{{ ticket.ticket_code }} - {{ ticket.status }} - {{ ticket.id }}</li>
+            <li>{{ ticket.date_created }} - {{ ticket.user.first_name }}</li>
+            <a href="/focaccine/{{ ticket.id }}/">Vedi</a>
+            {% empty %}
+            <li>No tickets found.</li>
+            {% endfor %}
+        </div>
+    </div>
+
+    <script>
+        // Add Bulma tab switch functionality here
+    </script>
+
+</body>
+
+</html>
